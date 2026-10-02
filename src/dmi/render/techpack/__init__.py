@@ -155,6 +155,19 @@ def view(
             v = pm.values.get(size)
             tol = tolerance(v, optional=bool(d and not d.needs_tolerance))
             rows.append([cell(pm.name), cell(size), length(v), tol, cell(how, optional=True)])
+    stated = {pm.code for pm in p.poms}
+    for d in defs.values():  # every standard measurement of the category, stated or a gap
+        if d.code not in stated:
+            for size in p.sizes:
+                rows.append(
+                    [
+                        cell(d.name),
+                        cell(size),
+                        GAP,
+                        tolerance(None, not d.needs_tolerance),
+                        cell(d.how_to_measure),
+                    ]
+                )
     s.append(
         {
             "title": "Measurements",
@@ -182,7 +195,16 @@ def view(
             [cell("Height"), length(pl.height)],
             [cell("Height tolerance"), tolerance(pl.height)],
             [cell("Position"), position(pl.position)],
-            [cell("Stitch count"), cell(pl.stitch_count, optional=True)]
+            [
+                cell("Stitch count"),
+                cell(
+                    pl.stitch_count,
+                    optional=not any(
+                        f.code == "stitch-count-missing" and f.field == f"placements.{pl.id}"
+                        for f in findings
+                    ),
+                ),
+            ]
             if pl.technique and "embroider" in pl.technique or pl.technique == "chain-stitch"
             else None,
             [cell("Density"), cell(pl.density, optional=True)]
@@ -421,6 +443,26 @@ def render_pdf(
         root=str(root),
         sys_inputs={"view": json.dumps(v, sort_keys=True)},
         ignore_system_fonts=True,  # bundled fonts only: the same bytes on every machine
+    )
+
+
+def render_pages(
+    p: Product,
+    findings: list[Finding],
+    resolve: Resolver | None = None,
+    root: Path | None = None,
+    ppi: int = 110,
+) -> list[bytes]:
+    """The tech pack's pages as PNGs (for a Haki swipe card)."""
+    root = root or Path.cwd()
+    v = view(p, findings, resolve, root)
+    return typst.compile(
+        TEMPLATE.read_bytes(),
+        root=str(root),
+        sys_inputs={"view": json.dumps(v, sort_keys=True)},
+        ignore_system_fonts=True,
+        format="png",
+        ppi=ppi,
     )
 
 
