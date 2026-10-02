@@ -28,7 +28,7 @@
   touches: ["src/dmi/checks/**", "tests/test_checks*"]
   agents: [spec-dev]
   checkpoint: false
-  state: review
+  state: merged
   branch: checks-headwear
   gate: full
 
@@ -43,7 +43,7 @@
   touches: ["profiles/haki/**", "src/dmi/importers/**", "tests/test_import*"]
   agents: [client-dev]
   checkpoint: false
-  state: review
+  state: merged
   branch: haki-importer
   gate: full
 
@@ -58,8 +58,8 @@
   touches: ["src/dmi/render/deck/**", "tests/test_render_deck*"]
   agents: [techpack-dev]
   checkpoint: false
-  state: todo
-  branch: null
+  state: building
+  branch: render-haki-deck
   gate: full
 
 - id: render-techpack
