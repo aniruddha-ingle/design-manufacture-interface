@@ -58,8 +58,8 @@
   touches: ["src/dmi/render/deck/**", "tests/test_render_deck*"]
   agents: [techpack-dev]
   checkpoint: false
-  state: todo
-  branch: null
+  state: building
+  branch: render-haki-deck
   gate: full
 
 - id: render-techpack
