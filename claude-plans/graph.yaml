@@ -28,7 +28,7 @@
   touches: ["src/dmi/checks/**", "tests/test_checks*"]
   agents: [spec-dev]
   checkpoint: false
-  state: building
+  state: review
   branch: checks-headwear
   gate: full
 
