@@ -63,8 +63,11 @@ def position(p: Position | None) -> str | None:
         return None
     across = _dir(p.dx_mm, "to the viewer's right", "to the viewer's left")
     up = _dir(p.dy_mm, "up", "down")
-    where = f"{across}, {up}" if (p.dx_mm or p.dy_mm) else "on the point"
-    s = f"{p.to.replace('-', ' ')} {where} from {p.anchor.replace('-', ' ')}"
+    point, anchor = p.to.replace("-", " "), p.anchor.replace("-", " ")
+    if p.dx_mm or p.dy_mm:
+        s = f"{point} {across}, {up} from {anchor}"
+    else:
+        s = f"{point} aligned at {anchor}"
     return s + (f" ({p.note})" if p.note else "")
 
 
