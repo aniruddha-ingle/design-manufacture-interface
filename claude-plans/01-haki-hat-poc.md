@@ -1,6 +1,6 @@
 # 01 · Haki POC: one hat, one spec, a package that needs no revisions
 
-Status: **draft** (2026-10-02, design-manufacture-interface-d4, before the first factory-lead).
+Status: **built** (2026-10-02, lead-1 in session design-manufacture-interface-d4); all nodes merged after factory-reviewer PASS.
 
 ## Why
 Haki's first hat went to its factory as a slide deck (references, artwork per placement, a
@@ -58,3 +58,19 @@ report, and the reviewer's table of the five revisions: stated or not. Then the 
 
 ## Cost
 CPU: seconds per render; nothing heavy. Spend: none.
+
+## Result (2026-10-02)
+- `python -m dmi package SPEC --decks ... --history ...` renders, under `DMI_HOME`: Haki's
+  brief deck and revision deck with the spec's numbers and gaps, the complete tech pack PDF,
+  the BOM workbook, the gap report, and a Haki swipe item (tech pack pages).
+- **North-star test on `haki-hat-01`:** the checks on spec v1 (imported from the brief deck
+  alone) flag every one of the five fields the sample-2 revision deck later changed
+  (artwork position and size, two points of measure, the closure hardware, a missing label)
+  as gaps before the sample. A complete first package would have asked all five questions.
+  Caveat: for the hardware it asks for material, finish and size, not the requirement the
+  revision named; the revision-history checks now ask for requirements on that kind.
+- Open gaps on v2 are warnings for Haki (profile `gap_severity: warn`), listed in the PDF.
+- Decisions made by the lead (2026-10-02): Typst with bundled fonts for the PDF (same bytes
+  everywhere); lengths under 10 mm in mm; positions in words with direction; an untitled
+  slide continues the change before it; a lone measurement drawn on a photo is never taken
+  as a target; the reviewer's two questions (ranged POMs as min/max, anchors per category).
