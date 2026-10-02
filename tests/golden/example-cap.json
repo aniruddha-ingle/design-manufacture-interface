@@ -1,0 +1,73 @@
+{
+  "format_version": 1,
+  "id": "pre:example:six-panel-cap",
+  "client": "example",
+  "category": "headwear",
+  "name": "Six-panel cap (synthetic golden product)",
+  "colourway": "forest",
+  "season": "SYN-01",
+  "spec_version": 2,
+  "sizes": ["OS"],
+  "materials": [
+    {"id": "shell", "role": "shell", "description": "Cotton twill", "composition": [{"fibre": "cotton", "percent": 100}], "weight_gsm": 280, "colour": {"name": "Forest", "system": "pantone-tcx", "code": "00-0000 TCX"}, "supplier_ref": "SYN-TWILL-280"},
+    {"id": "sweatband", "role": "sweatband", "description": "Cotton sweatband tape", "composition": [{"fibre": "cotton", "percent": 100}], "colour": {"name": "Natural", "system": "other", "code": "SYN-NAT"}},
+    {"id": "strap", "role": "strap", "description": "Vegetable-tanned leather strap", "thickness": {"mm": 1.6, "tol_mm": 0.2}, "colour": {"name": "Tan", "system": "other", "code": "SYN-TAN"}},
+    {"id": "brim-board", "role": "brim-board", "description": "Polyethylene brim insert", "thickness": {"mm": 0.8, "tol_mm": 0.1}}
+  ],
+  "placements": [
+    {"id": "front-logo", "location": "front", "artwork_ref": "SYN-ART-01", "technique": "puff-embroidery",
+     "width": {"mm": 60, "tol_mm": 2}, "height": {"mm": 45, "tol_mm": 2},
+     "position": {"anchor": "brim-seam-centre-front", "to": "bottom-edge", "dx_mm": 0, "dy_mm": 25, "note": "centred on the centre front seam"},
+     "elements": [
+       {"name": "letter fill", "colour": {"name": "Cream", "system": "madeira", "code": "SYN-1001"}, "thread": "rayon 40 wt", "stitch_type": "satin"},
+       {"name": "outline", "colour": {"name": "Forest", "system": "madeira", "code": "SYN-1002"}, "thread": "rayon 40 wt", "stitch_type": "satin"}
+     ],
+     "stitch_count": 9000, "density": "0.4 mm spacing", "foam_height_mm": 3},
+    {"id": "left-side-mark", "location": "left-side", "artwork_ref": "SYN-ART-02", "technique": "flat-embroidery",
+     "width": {"mm": 30, "tol_mm": 1}, "height": {"mm": 30, "tol_mm": 1},
+     "position": {"anchor": "brim-seam-left-side-seam", "to": "centre", "dx_mm": -40, "dy_mm": 35},
+     "elements": [{"name": "mark", "colour": {"name": "Cream", "system": "madeira", "code": "SYN-1001"}, "thread": "rayon 40 wt", "stitch_type": "fill"}]}
+  ],
+  "poms": [
+    {"code": "crown-height", "name": "Crown height", "values": {"OS": {"mm": 95, "tol_mm": 3}}},
+    {"code": "front-panel-height", "name": "Front panel height", "values": {"OS": {"mm": 110, "tol_mm": 2}}},
+    {"code": "brim-length", "name": "Brim length", "values": {"OS": {"mm": 75, "tol_mm": 2}}},
+    {"code": "brim-width", "name": "Brim width", "values": {"OS": {"mm": 185, "tol_mm": 3}}},
+    {"code": "head-circumference", "name": "Head circumference", "values": {"OS": {"min_mm": 540, "max_mm": 600, "tol_mm": 5}}},
+    {"code": "back-opening-width", "name": "Back opening width", "values": {"OS": {"mm": 70, "tol_mm": 3}}},
+    {"code": "back-opening-height", "name": "Back opening height", "values": {"OS": {"mm": 50, "tol_mm": 3}}},
+    {"code": "strap-length", "name": "Strap length", "values": {"OS": {"mm": 230, "tol_mm": 3, "tol_minus_mm": 1}}}
+  ],
+  "construction": {"structure": "unstructured", "crown": "low", "panels": 6, "brim": "pre-curved", "closure": "strap-buckle",
+    "seams": [
+      {"location": "panel seams", "stitch_type": "lockstitch 301", "spi": 10, "thread": "polyester tex 40, tonal", "finish": "top-stitched 2 mm both sides"},
+      {"location": "brim", "stitch_type": "lockstitch 301", "spi": 8, "thread": "polyester tex 40, tonal", "rows": 8},
+      {"location": "sweatband", "stitch_type": "lockstitch 301", "spi": 10, "rows": 1}
+    ]},
+  "hardware": [
+    {"id": "buckle", "kind": "clasp", "description": "Slide buckle without teeth", "quantity": 1, "material": "brass", "finish": "brushed nickel", "size": {"mm": 20, "tol_mm": 0.5}, "requirements": ["no teeth; must not mark the leather strap"]},
+    {"id": "top-button", "kind": "top-button", "description": "Fabric-covered top button, shell fabric", "quantity": 1, "position": {"anchor": "top-button", "to": "centre", "dx_mm": 0, "dy_mm": 0}},
+    {"id": "eyelets", "kind": "eyelet", "description": "Sewn eyelets, tonal thread", "quantity": 6, "position": {"anchor": "top-button", "to": "centre", "dy_mm": -55, "note": "one per panel, 55 mm down each panel seam"}}
+  ],
+  "labels": [
+    {"id": "inner-brand", "kind": "inner", "position": {"anchor": "sweatband-seam-centre-back", "to": "bottom-edge", "dx_mm": 0, "dy_mm": 0}, "artwork_ref": "SYN-LBL-01", "material": "woven", "attachment": "sewn into sweatband seam", "width": {"mm": 50, "tol_mm": 1}, "height": {"mm": 20, "tol_mm": 1}},
+    {"id": "care", "kind": "care", "position": {"anchor": "sweatband-seam-centre-back", "to": "bottom-edge", "dx_mm": -60, "dy_mm": 0}, "material": "printed satin", "attachment": "sewn into seam", "content": "100% cotton. Spot clean only. Made in SYN."}
+  ],
+  "trims": [{"id": "sweatband-tape", "kind": "sweatband", "description": "Sweatband tape", "material_id": "sweatband", "width": {"mm": 25, "tol_mm": 1}}],
+  "packaging": {"unit": "polybag", "folding": "flat, crown stuffed with tissue", "labels": ["barcode sticker on polybag"], "carton": "50 per carton"},
+  "quantities": {"OS": 300},
+  "references": [
+    {"id": "shape-ref-1", "kind": "shape", "ref": "SYN-REF-01", "caption": "crown shape and brim curve to match", "authority": "exact"},
+    {"id": "mockup-front", "kind": "mockup", "ref": "SYN-MOCK-01", "caption": "front logo placement", "authority": "approximate"}
+  ],
+  "sample_rounds": [
+    {"n": 1, "made_from_spec_version": 1, "applied_in_spec_version": 2, "received": "2026-09-01", "changes": [
+      {"n": 1, "area": "pom", "field": "poms.brim-length", "summary": "Brim too long", "current": "80 mm", "target": "75 mm", "current_value": {"mm": 80}, "target_value": {"mm": 75, "tol_mm": 2}, "reason": "brim reads oversized on the head", "image_refs": ["SYN-S1-01"]},
+      {"n": 2, "area": "hardware", "field": "hardware.buckle", "summary": "Use a buckle without teeth", "current": "toothed buckle", "target": "slide buckle without teeth", "reason": "teeth mark the leather strap"}
+    ]}
+  ],
+  "approvals": [
+    {"spec_version": 2, "who": "u-0001", "decision": "keep", "note": "synthetic", "at": "2026-09-05T12:00:00Z", "source": "haki-swipe"}
+  ],
+  "notes": ["Synthetic golden product for tests; not any client's style."]
+}
