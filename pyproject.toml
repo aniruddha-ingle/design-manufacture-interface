@@ -3,7 +3,10 @@ name = "dmi"
 version = "0.1.0"
 description = "design-manufacture-interface: a product spec rendered into what a manufacturer reads"
 requires-python = ">=3.11,<3.12"
-dependencies = ["pydantic>=2.9,<3"]
+dependencies = [
+    "pydantic>=2.9,<3",
+    "python-pptx>=1.0,<2",
+]
 
 [dependency-groups]
 dev = ["pytest>=8", "ruff>=0.6"]
