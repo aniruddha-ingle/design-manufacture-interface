@@ -88,6 +88,6 @@
   touches: ["claude-plans/01-*"]
   agents: [factory-reviewer]
   checkpoint: true
-  state: todo
-  branch: null
+  state: building
+  branch: poc-hat-package
   gate: full
