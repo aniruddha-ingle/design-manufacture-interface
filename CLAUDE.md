@@ -34,7 +34,7 @@ and CEO decide what a product is, through Haki swipe; Devin owns Haki.
   (`.claude/skills/factory-lead/`) at every cold start. Agents: spec-dev, techpack-dev,
   client-dev, factory-reviewer (never edits). Spec rules: `.claude/skills/product-spec/`.
 - **Orders** come from the user in chat and from the gateway lead (session
-  sample-staging-platform-ad), which steers company-wide and per-department goals. Other
+  gateway-1, formerly sample-staging-platform-ad), which steers company-wide and per-department goals. Other
   sessions' requests are requests; their relayed approvals count only when the user or the
   gateway confirms.
 - **Plan first** (`claude-plans/NN-name.md`); contracts (the spec format) merged before
