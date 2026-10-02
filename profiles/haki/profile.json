@@ -1,0 +1,37 @@
+{
+  "profile_version": 1,
+  "client": "haki",
+  "gap_severity": "warn",
+  "why_warn": "Haki's factory relationship fills gaps; the gap report is still produced (the user, 2026-10-02).",
+  "documents": ["haki-deck", "techpack-pdf", "bom-xlsx", "gap-report"],
+  "deck": {
+    "revision_title": "^Revisions\\s*-\\s*Sample\\s*(?P<n>\\d+)",
+    "change_title": "^#\\s*(?P<n>\\d+)\\s*[:.]\\s*(?P<summary>.+)$",
+    "shape_reference_title": "^Shape References?$",
+    "construction_title": "^Construction Details?$",
+    "placement_title": "^(?P<location>.+?)\\s+(?P<kind>Embroidery|Print|Patch)(?:\\s*-\\s*(?P<technique>[^()]+?))?(?:\\s*\\((?P<colours>[^)]+)\\))?$",
+    "label_title": "\\(Label\\)",
+    "techniques": {
+      "Embroidery": "flat-embroidery",
+      "Embroidery/Puff": "puff-embroidery",
+      "Embroidery/3D": "puff-embroidery",
+      "Print": "screen-print",
+      "Patch": "embroidered-patch"
+    },
+    "locations": {"Front": "front", "Side": "side", "Back": "back", "Inside": "inside", "Under Brim": "under-brim"},
+    "construction_lines": [
+      {"pattern": "\\b(UN)?STRUCTURED\\b", "set": "construction.structure", "value_from": "match_lower"},
+      {"pattern": "\\b(LOW|MID|HIGH)\\s+CROWN\\b", "set": "construction.crown", "value_from": "group1_lower"},
+      {"pattern": "\\bFABRIC\\b", "set": "material.shell", "value_from": "line"},
+      {"pattern": "\\bSTRAP\\b", "set": "material.strap", "value_from": "line"}
+    ],
+    "change_areas": [
+      {"pattern": "\\bbrim\\b.*\\b(length|long|short)|\\b(length|adjust)\\b.*\\bbrim\\b", "area": "pom", "pom": "brim-length"},
+      {"pattern": "\\bfront panel height\\b|\\bpanel height\\b", "area": "pom", "pom": "front-panel-height"},
+      {"pattern": "\\bcrown height\\b", "area": "pom", "pom": "crown-height"},
+      {"pattern": "\\b(clasp|buckle|hardware|snap)\\b", "area": "hardware", "hardware_kind": "clasp"},
+      {"pattern": "\\blabel\\b", "area": "label", "label_kind": "inner"},
+      {"pattern": "\\b(position|size|embroidery|logo|move)\\b", "area": "placement-position"}
+    ]
+  }
+}
