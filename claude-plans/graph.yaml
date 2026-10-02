@@ -58,7 +58,7 @@
   touches: ["src/dmi/render/deck/**", "tests/test_render_deck*"]
   agents: [techpack-dev]
   checkpoint: false
-  state: review
+  state: merged
   branch: render-haki-deck
   gate: full
 
@@ -73,8 +73,8 @@
   touches: ["src/dmi/render/techpack/**", "src/dmi/render/bom/**", "tests/test_render_techpack*"]
   agents: [techpack-dev]
   checkpoint: false
-  state: todo
-  branch: null
+  state: review
+  branch: render-techpack
   gate: full
 
 - id: poc-hat-package
