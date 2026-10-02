@@ -61,6 +61,11 @@ combined."
 - Items carry stable ids (the product id, the spec version, the sample round) so a verdict
   maps back to exactly what was voted on; a note is the person's own words, kept verbatim.
 - Only reviewed work (factory-reviewer PASS) goes into a deck shown to the CEO or COO.
+- **Demo exception** (the user, 2026-10-02: "I allow sending unevaluated clips to Haki swipe as
+  demo items, and rendering outside heavy-test, for C-suite demos"): when the user asks for a
+  CEO or COO demo, items go straight into Haki swipe labelled "demo · not evaluated", renders
+  may skip `heavy-test` (still niced), and the factory-reviewer runs after the demo. A demo is
+  never approval to send anything to a manufacturer.
 - Haki's items stay inside the private page and its exports, never in git.
 
 ## 1b. Speed and spend

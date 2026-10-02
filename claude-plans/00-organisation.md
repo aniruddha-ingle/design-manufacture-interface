@@ -30,3 +30,12 @@
 - **Confidentiality slip, fixed:** the handoff's first §2 recorded the hat's name and
   measurements in studio's git; lead-9 removed both commits before any push (studio 8fc37e6
   holds the method only).
+- **Demo rule** (the user, 2026-10-02; relayed first by gateway-1, then confirmed here: "I allow
+  sending unevaluated clips to Haki swipe as demo items, and rendering outside heavy-test, for
+  C-suite demos"). The relayed words: "put it in the artifact as evaluator runs this one time, or
+  everytime i assk for a csuite demo like coo demo or ceo demo. this means they are sittign next
+  to me, not that we have to use this ad right now,, you see?" and "we can wait to go through
+  evaluator loop after they leave my desk". For a CEO/COO demo, items go straight into Haki swipe
+  labelled "demo · not evaluated", renders may run outside `heavy-test` (still niced), and the
+  factory-reviewer loop runs after the demo. A demo is never approval to send anything to a
+  manufacturer.
