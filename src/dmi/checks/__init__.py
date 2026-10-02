@@ -63,7 +63,7 @@ def learn(changes: Iterable[tuple[Product, Change]]) -> set[Learned]:
             out.add(Learned("hardware", hw.kind if hw else "*"))
         elif c.area == "label":
             lb = next((x for x in product.labels if x.id == ref), None)
-            out.add(Learned("label", lb.kind if lb else "*"))
+            out.add(Learned("label", lb.kind if lb and lb.kind != "unspecified" else "*"))
         elif c.area != "other":
             out.add(Learned(c.area, "*"))
     return out
