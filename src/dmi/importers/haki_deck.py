@@ -292,7 +292,8 @@ def _change(spec: dict, prof: dict, ch: dict) -> dict:
     if area == "hardware":
         kind = match.group(1).lower()
         same = [h for h in spec["hardware"] if h["kind"] == kind]
-        hw = same[0] if same else (spec["hardware"][0] if len(spec["hardware"]) == 1 else None)
+        generic = [h for h in spec["hardware"] if h["kind"] == "hardware"]
+        hw = same[0] if same else (generic[0] if len(generic) == 1 else None)
         if hw is None:
             hw = {"id": slug(kind), "kind": kind, "description": ch["summary"]}
             spec["hardware"].append(hw)
