@@ -13,7 +13,7 @@
   touches: ["docs/contracts/**", "src/dmi/spec/**", "tests/test_spec*", "pyproject.toml", "uv.lock"]
   agents: [spec-dev]
   checkpoint: false
-  state: review
+  state: merged
   branch: spec-contract
   gate: full
 
