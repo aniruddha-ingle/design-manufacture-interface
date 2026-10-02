@@ -13,8 +13,8 @@
   touches: ["docs/contracts/**", "src/dmi/spec/**", "tests/test_spec*", "pyproject.toml", "uv.lock"]
   agents: [spec-dev]
   checkpoint: false
-  state: todo
-  branch: null
+  state: building
+  branch: spec-contract
   gate: full
 
 - id: checks-headwear
