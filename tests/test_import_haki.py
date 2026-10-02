@@ -48,7 +48,7 @@ def brief(tmp_path: Path) -> Path:
         tmp_path,
         "brief.pptx",
         [
-            {"title": "“Example” Cap - Olive"},
+            {"title": "Example Cap - Olive"},
             {"title": "Shape References", "pictures": 2},
             {"title": "Front Embroidery - Puff", "pictures": 1},
             {
@@ -56,11 +56,11 @@ def brief(tmp_path: Path) -> Path:
                 "pictures": 1,
                 "texts": ["Shape is not EXACT in the mockup, use Shape References"],
             },
-            {"title": "Back of Cap (Label)", "pictures": 2},
+            {"title": "Rear (Label)", "pictures": 2},
             {
                 "title": "Construction Details",
-                "body": "STRUCTURED, LOW CROWN, LONG BRIM FIT\nCOTTON CANVAS FABRIC\n"
-                "BROWN SUEDE STRAP & BRASS HARDWARE\nEMBROIDERY ON FRONT AND SIDE",
+                "body": "STRUCTURED, LOW CROWN\nCOTTON CANVAS FABRIC\n"
+                "BROWN SUEDE STRAP, BRASS HARDWARE\nMARKS STITCHED FRONT AND SIDE",
             },
         ],
     )
@@ -72,33 +72,26 @@ def revisions(tmp_path: Path) -> Path:
         tmp_path,
         "rev.pptx",
         [
-            {"title": "“Example” Cap - Olive", "texts": ["Revisions - Sample 3"], "pictures": 1},
+            {"title": "Example Cap - Olive", "texts": ["Revisions - Sample 3"], "pictures": 1},
             {
-                "title": "#1: Change position + size of front embroidery",
+                "title": "#1: Move and resize the front mark",
                 "pictures": 2,
                 "texts": ["Before:", "After:", "Move the mark left. Make it 5% bigger."],
             },
             {
-                "title": "#2: Change crown height",
+                "title": "#2: Crown height",
                 "pictures": 1,
-                "texts": ["4.2 cm", "Current sample is 4.6cm, adjust to 4.2cm"],
+                "texts": ["4.2 cm", "Current sample is 4.6cm, change it to 4.2cm"],
             },
+            {"title": "#3: Strap closure", "pictures": 1, "texts": ["Please use a smooth buckle"]},
+            {"title": "", "pictures": 1, "texts": ["The buckle scratches the strap"]},
+            {"title": "#4: Shorten the brim", "pictures": 1, "texts": ["5.7 cm"]},
+            {"title": "#5: Sew in a care label", "pictures": 3},
             {
-                "title": "#3. Back of Cap (Label)",
-                "pictures": 1,
-                "texts": ["Please use a smooth buckle"],
+                "title": "#6: Thread colour inside",
+                "texts": ["Use a darker thread for the inside mark"],
             },
-            {
-                "title": "#3. Back of Cap (Label)",
-                "pictures": 1,
-                "texts": ["The buckle scratches the strap"],
-            },
-            {
-                "title": "#4. Adjust brim length",
-                "pictures": 1,
-                "texts": ["5.7 cm", "Current sample brim is 6.1 cm, adjust down to 5.7 cm"],
-            },
-            {"title": "#5. Add Inner Label", "pictures": 3},
+            {"title": "General notes", "texts": ["Ship samples by air"]},
         ],
     )
 
@@ -129,8 +122,8 @@ def test_brief_deck_becomes_spec_v1(brief: Path):
     assert (c.structure, c.crown) == ("structured", "low")
     assert len(c.notes) == 4  # every line kept verbatim
     assert {m.id for m in p.materials} == {"shell", "strap"}
-    assert p.hardware[0].kind == "clasp"
-    assert p.labels[0].kind == "back-of-cap"
+    assert p.hardware[0].kind == "hardware"
+    assert p.labels[0].kind == "rear"
 
 
 def test_revision_deck_becomes_a_sample_round(brief: Path, revisions: Path):
@@ -139,23 +132,51 @@ def test_revision_deck_becomes_a_sample_round(brief: Path, revisions: Path):
     (r,) = p.sample_rounds
     assert (r.n, r.made_from_spec_version, r.applied_in_spec_version) == (3, 1, 2)
     by_n = {c.n: c for c in r.changes}
-    assert sorted(by_n) == [1, 2, 3, 4, 5]
-    assert (by_n[1].area, by_n[1].field) == ("placement-position", "placements.front-embroidery")
-    assert (by_n[2].field, by_n[2].current_value.mm, by_n[2].target_value.mm) == (
-        "poms.crown-height",
-        46,
-        42,
-    )
-    assert (by_n[4].field, by_n[4].target_value.mm) == ("poms.brim-length", 57)
-    assert p.pom("brim-length").values["OS"].mm == 57
-    assert (by_n[3].area, by_n[3].field) == ("hardware", "hardware.strap-hardware")
-    assert len(by_n[3].image_refs) == 2  # the change spans two slides
+    assert sorted(by_n) == [1, 2, 3, 4, 5, 6]
+    c1 = by_n[1]
+    assert (c1.area, c1.field) == ("placement-position", "placements.front-embroidery")
+    assert "also: placement-size" in c1.summary
+    c2 = by_n[2]
+    assert (c2.field, c2.current_value.mm, c2.target_value.mm) == ("poms.crown-height", 46, 42)
+    assert p.pom("crown-height").values["OS"].mm == 42
+    # a lone measurement drawn on a photo is never taken as the target
+    c4 = by_n[4]
+    assert c4.field == "poms.brim-length" and c4.target_value is None
+    assert "drawn on photo: 5.7 cm" in c4.target
+    assert p.pom("brim-length").values == {}
+    # the untitled slide continues change 3
+    assert (by_n[3].area, by_n[3].field) == ("hardware", "hardware.hardware")
+    assert len(by_n[3].image_refs) == 2
     assert p.hardware[0].requirements == [
         "Please use a smooth buckle",
         "The buckle scratches the strap",
     ]
-    assert (by_n[5].area, by_n[5].field) == ("label", "labels.inner-label")
-    assert len(by_n[5].image_refs) == 3
+    assert (by_n[5].area, by_n[5].field) == ("label", "labels.care-label")
+    # a placement is matched by its own location word, never by a substring or fallback
+    assert (by_n[6].area, by_n[6].field) == ("colour", "placements")
+    assert any("General notes / Ship samples by air" in n for n in p.notes)
+
+
+def test_unmapped_technique_is_a_gap(tmp_path: Path):
+    d = deck(tmp_path, "b.pptx", [{"title": "Cap - Red"}, {"title": "Front Embroidery - Sparkle"}])
+    (pl,) = import_brief(d, "pre:haki:cap-02").placements
+    assert pl.technique is None and "not mapped" in pl.notes[0]
+
+
+def test_untitled_brief_slide_is_kept(tmp_path: Path):
+    d = deck(
+        tmp_path, "b.pptx", [{"title": "Cap - Red"}, {"title": "", "pictures": 1, "texts": ["x"]}]
+    )
+    p = import_brief(d, "pre:haki:cap-03")
+    assert any("(untitled slide) / x" in n for n in p.notes)
+    assert [r.kind for r in p.references] == ["other"]
+
+
+def test_colourway_required(tmp_path: Path):
+    d = deck(tmp_path, "b.pptx", [{"title": "Cap"}])
+    with pytest.raises(ValueError, match="colourway"):
+        import_brief(d, "pre:haki:cap-04")
+    assert import_brief(d, "pre:haki:cap-04", colourway="Red").colourway == "red"
 
 
 def test_import_is_deterministic(brief: Path, revisions: Path):

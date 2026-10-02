@@ -4,6 +4,7 @@
   "gap_severity": "warn",
   "why_warn": "Haki's factory relationship fills gaps; the gap report is still produced (the user, 2026-10-02).",
   "documents": ["haki-deck", "techpack-pdf", "bom-xlsx", "gap-report"],
+  "defaults": {"category": "headwear", "sizes": ["OS"]},
   "deck": {
     "revision_title": "^Revisions\\s*-\\s*Sample\\s*(?P<n>\\d+)",
     "change_title": "^#\\s*(?P<n>\\d+)\\s*[:.]\\s*(?P<summary>.+)$",
@@ -13,25 +14,35 @@
     "label_title": "\\(Label\\)",
     "techniques": {
       "Embroidery": "flat-embroidery",
+      "Embroidery/Flat": "flat-embroidery",
       "Embroidery/Puff": "puff-embroidery",
       "Embroidery/3D": "puff-embroidery",
+      "Embroidery/Chain": "chain-stitch",
       "Print": "screen-print",
-      "Patch": "embroidered-patch"
+      "Print/Screen": "screen-print",
+      "Print/Heat Transfer": "heat-transfer",
+      "Patch/Woven": "woven-patch",
+      "Patch/Embroidered": "embroidered-patch",
+      "Patch/Leather": "leather-patch"
     },
-    "locations": {"Front": "front", "Side": "side", "Back": "back", "Inside": "inside", "Under Brim": "under-brim"},
+    "locations": {"Front": "front", "Side": "side", "Left Side": "left-side", "Right Side": "right-side", "Back": "back", "Inside": "inside", "Under Brim": "under-brim"},
+    "label_kinds": {"care": "care", "size": "size", "inner": "inner", "main": "main", "brand": "brand", "woven": "woven", "back": "back", "hang": "hang-tag"},
     "construction_lines": [
       {"pattern": "\\b(UN)?STRUCTURED\\b", "set": "construction.structure", "value_from": "match_lower"},
       {"pattern": "\\b(LOW|MID|HIGH)\\s+CROWN\\b", "set": "construction.crown", "value_from": "group1_lower"},
       {"pattern": "\\bFABRIC\\b", "set": "material.shell", "value_from": "line"},
-      {"pattern": "\\bSTRAP\\b", "set": "material.strap", "value_from": "line"}
+      {"pattern": "\\bSTRAP\\b", "set": "material.strap", "value_from": "line"},
+      {"pattern": "\\b(clasp|buckle|snap|hardware)\\b", "set": "hardware.kind", "value_from": "line"}
     ],
     "change_areas": [
-      {"pattern": "\\bbrim\\b.*\\b(length|long|short)|\\b(length|adjust)\\b.*\\bbrim\\b", "area": "pom", "pom": "brim-length"},
+      {"pattern": "\\bbrim\\b.*\\b(length|long|longer|short|shorter)\\b|\\b(length|adjust|shorten|lengthen)\\b.*\\bbrim\\b", "area": "pom", "pom": "brim-length"},
       {"pattern": "\\bfront panel height\\b|\\bpanel height\\b", "area": "pom", "pom": "front-panel-height"},
       {"pattern": "\\bcrown height\\b", "area": "pom", "pom": "crown-height"},
-      {"pattern": "\\b(clasp|buckle|hardware|snap)\\b", "area": "hardware", "hardware_kind": "clasp"},
-      {"pattern": "\\blabel\\b", "area": "label", "label_kind": "inner"},
-      {"pattern": "\\b(position|size|embroidery|logo|move)\\b", "area": "placement-position"}
+      {"pattern": "\\b(clasp|buckle|snap)\\b", "area": "hardware"},
+      {"pattern": "\\b(label|tag)\\b", "area": "label"},
+      {"pattern": "\\b(colou?r|thread)\\b", "area": "colour"},
+      {"pattern": "\\b(position|move|centre|center|left|right|higher|lower)\\b", "area": "placement-position"},
+      {"pattern": "\\b(size|smaller|bigger|larger)\\b|%", "area": "placement-size"}
     ]
   }
 }
