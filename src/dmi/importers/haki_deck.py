@@ -312,3 +312,23 @@ def _change(spec: dict, prof: dict, ch: dict) -> dict:
         return {**out, "area": area, "field": "placements"}
     pl.setdefault("notes", []).append(f"change {ch['n']}: {text}")
     return {**out, "area": area, "field": f"placements.{pl['id']}"}
+
+
+def extract_images(path: Path) -> dict[str, Path]:
+    """Copy a deck's pictures into DMI_HOME/assets/<deck id>/ (outside git) and map each image
+    ref ("deck-...#sNpK", same order as ``read_slides``) to its file."""
+    from dmi.paths import home
+
+    deck_id, _ = read_slides(path)
+    out_dir = home() / "assets" / deck_id
+    out: dict[str, Path] = {}
+    for i, s in enumerate(Presentation(str(path)).slides, 1):
+        shapes = sorted(s.shapes, key=lambda sh: ((sh.top or 0), (sh.left or 0)))
+        pics = [sh for sh in shapes if sh.shape_type == MSO_SHAPE_TYPE.PICTURE]
+        for k, sh in enumerate(pics, 1):
+            dest = out_dir / f"s{i}p{k}.{sh.image.ext}"
+            if not dest.exists():
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                dest.write_bytes(sh.image.blob)
+            out[f"{deck_id}#s{i}p{k}"] = dest
+    return out
