@@ -43,7 +43,7 @@
   touches: ["profiles/haki/**", "src/dmi/importers/**", "tests/test_import*"]
   agents: [client-dev]
   checkpoint: false
-  state: review
+  state: merged
   branch: haki-importer
   gate: full
 
