@@ -1,0 +1,1463 @@
+{
+  "$defs": {
+    "Approval": {
+      "additionalProperties": false,
+      "description": "A verdict on a spec version (e.g. from Haki swipe). Times are stored in UTC.",
+      "properties": {
+        "at": {
+          "format": "date-time",
+          "title": "At",
+          "type": "string"
+        },
+        "decision": {
+          "enum": [
+            "keep",
+            "cut",
+            "love"
+          ],
+          "title": "Decision",
+          "type": "string"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        },
+        "source": {
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "spec_version": {
+          "exclusiveMinimum": 0,
+          "title": "Spec Version",
+          "type": "integer"
+        },
+        "who": {
+          "maxLength": 64,
+          "pattern": "^[a-z]+-[0-9a-z]+$",
+          "title": "Who",
+          "type": "string"
+        }
+      },
+      "required": [
+        "spec_version",
+        "who",
+        "decision",
+        "at",
+        "source"
+      ],
+      "title": "Approval",
+      "type": "object"
+    },
+    "ArtworkElement": {
+      "additionalProperties": false,
+      "description": "One coloured part of an artwork (a letter, an outline, a fill) and how it is made.",
+      "properties": {
+        "colour": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Colour"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "stitch_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stitch Type"
+        },
+        "thread": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Thread"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "ArtworkElement",
+      "type": "object"
+    },
+    "Change": {
+      "additionalProperties": false,
+      "description": "One numbered revision after a sample: what the sample did, what it should do, and why.",
+      "properties": {
+        "area": {
+          "enum": [
+            "placement-position",
+            "placement-size",
+            "pom",
+            "hardware",
+            "label",
+            "material",
+            "colour",
+            "construction",
+            "trim",
+            "packaging",
+            "other"
+          ],
+          "title": "Area",
+          "type": "string"
+        },
+        "current": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Current"
+        },
+        "current_value": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Length"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "field": {
+          "minLength": 1,
+          "title": "Field",
+          "type": "string"
+        },
+        "image_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Image Refs",
+          "type": "array"
+        },
+        "n": {
+          "exclusiveMinimum": 0,
+          "title": "N",
+          "type": "integer"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "summary": {
+          "minLength": 1,
+          "title": "Summary",
+          "type": "string"
+        },
+        "target": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target"
+        },
+        "target_value": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Length"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "n",
+        "area",
+        "field",
+        "summary"
+      ],
+      "title": "Change",
+      "type": "object"
+    },
+    "Colour": {
+      "additionalProperties": false,
+      "description": "A colour the factory can match: a standard reference, or at least a name and a swatch.",
+      "properties": {
+        "code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Code"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "system": {
+          "anyOf": [
+            {
+              "enum": [
+                "pantone-tcx",
+                "pantone-tpx",
+                "pantone-c",
+                "madeira",
+                "isacord",
+                "hex",
+                "other"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "System"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "Colour",
+      "type": "object"
+    },
+    "Construction": {
+      "additionalProperties": false,
+      "properties": {
+        "brim": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Brim"
+        },
+        "closure": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Closure"
+        },
+        "crown": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Crown"
+        },
+        "notes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Notes",
+          "type": "array"
+        },
+        "panels": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Panels"
+        },
+        "seams": {
+          "items": {
+            "$ref": "#/$defs/Seam"
+          },
+          "title": "Seams",
+          "type": "array"
+        },
+        "structure": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Structure"
+        }
+      },
+      "title": "Construction",
+      "type": "object"
+    },
+    "Fibre": {
+      "additionalProperties": false,
+      "properties": {
+        "fibre": {
+          "minLength": 1,
+          "title": "Fibre",
+          "type": "string"
+        },
+        "percent": {
+          "exclusiveMinimum": 0,
+          "maximum": 100,
+          "title": "Percent",
+          "type": "number"
+        }
+      },
+      "required": [
+        "fibre",
+        "percent"
+      ],
+      "title": "Fibre",
+      "type": "object"
+    },
+    "Hardware": {
+      "additionalProperties": false,
+      "properties": {
+        "colour": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Colour"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "description": {
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "finish": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Finish"
+        },
+        "id": {
+          "maxLength": 64,
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "minLength": 1,
+          "title": "Kind",
+          "type": "string"
+        },
+        "material": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Material"
+        },
+        "position": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Position"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "quantity": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Quantity"
+        },
+        "requirements": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Requirements",
+          "type": "array"
+        },
+        "size": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Length"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "supplier_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Supplier Ref"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "description"
+      ],
+      "title": "Hardware",
+      "type": "object"
+    },
+    "Label": {
+      "additionalProperties": false,
+      "properties": {
+        "artwork_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Artwork Ref"
+        },
+        "attachment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Attachment"
+        },
+        "content": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Content"
+        },
+        "height": {
+          "$ref": "#/$defs/Length"
+        },
+        "id": {
+          "maxLength": 64,
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "minLength": 1,
+          "title": "Kind",
+          "type": "string"
+        },
+        "material": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Material"
+        },
+        "position": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Position"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "width": {
+          "$ref": "#/$defs/Length"
+        }
+      },
+      "required": [
+        "id",
+        "kind"
+      ],
+      "title": "Label",
+      "type": "object"
+    },
+    "Length": {
+      "additionalProperties": false,
+      "description": "A measured value in mm. ``mm=None`` (and no range) is a gap.\n\n``tol_mm`` is the + tolerance and, unless ``tol_minus_mm`` is set, also the - tolerance.\nAn adjustable dimension (a head circumference with a strap) is a range: ``min_mm``/``max_mm``.",
+      "properties": {
+        "max_mm": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Mm"
+        },
+        "min_mm": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min Mm"
+        },
+        "mm": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mm"
+        },
+        "tol_minus_mm": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tol Minus Mm"
+        },
+        "tol_mm": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tol Mm"
+        }
+      },
+      "title": "Length",
+      "type": "object"
+    },
+    "Material": {
+      "additionalProperties": false,
+      "properties": {
+        "colour": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Colour"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "composition": {
+          "items": {
+            "$ref": "#/$defs/Fibre"
+          },
+          "title": "Composition",
+          "type": "array"
+        },
+        "description": {
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "id": {
+          "maxLength": 64,
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "role": {
+          "minLength": 1,
+          "title": "Role",
+          "type": "string"
+        },
+        "supplier_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Supplier Ref"
+        },
+        "thickness": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Length"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "weight_gsm": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weight Gsm"
+        }
+      },
+      "required": [
+        "id",
+        "role",
+        "description"
+      ],
+      "title": "Material",
+      "type": "object"
+    },
+    "Packaging": {
+      "additionalProperties": false,
+      "properties": {
+        "carton": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Carton"
+        },
+        "folding": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Folding"
+        },
+        "labels": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Labels",
+          "type": "array"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
+        }
+      },
+      "title": "Packaging",
+      "type": "object"
+    },
+    "Placement": {
+      "additionalProperties": false,
+      "description": "One piece of artwork on the product.",
+      "properties": {
+        "artwork_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Artwork Ref"
+        },
+        "density": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Density"
+        },
+        "elements": {
+          "items": {
+            "$ref": "#/$defs/ArtworkElement"
+          },
+          "title": "Elements",
+          "type": "array"
+        },
+        "foam_height_mm": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Foam Height Mm"
+        },
+        "height": {
+          "$ref": "#/$defs/Length"
+        },
+        "id": {
+          "maxLength": 64,
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "location": {
+          "minLength": 1,
+          "title": "Location",
+          "type": "string"
+        },
+        "notes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Notes",
+          "type": "array"
+        },
+        "position": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Position"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "stitch_count": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stitch Count"
+        },
+        "technique": {
+          "anyOf": [
+            {
+              "enum": [
+                "flat-embroidery",
+                "puff-embroidery",
+                "chain-stitch",
+                "applique",
+                "woven-patch",
+                "embroidered-patch",
+                "leather-patch",
+                "screen-print",
+                "heat-transfer",
+                "other"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Technique"
+        },
+        "width": {
+          "$ref": "#/$defs/Length"
+        }
+      },
+      "required": [
+        "id",
+        "location"
+      ],
+      "title": "Placement",
+      "type": "object"
+    },
+    "Pom": {
+      "additionalProperties": false,
+      "description": "A point of measure. ``values`` maps size -> length; one-size products use \"OS\".",
+      "properties": {
+        "code": {
+          "maxLength": 64,
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Code",
+          "type": "string"
+        },
+        "how_to_measure": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "How To Measure"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "values": {
+          "additionalProperties": {
+            "$ref": "#/$defs/Length"
+          },
+          "title": "Values",
+          "type": "object"
+        }
+      },
+      "required": [
+        "code",
+        "name"
+      ],
+      "title": "Pom",
+      "type": "object"
+    },
+    "Position": {
+      "additionalProperties": false,
+      "description": "Where something sits: the offset from an anchor on the product to a point of the item.\n\nSeen from outside, facing the surface the item is on: +dx is to the viewer's right, +dy is\nup (towards the crown on a hat). ``anchor`` comes from the category's anchor vocabulary\n(``dmi.spec.categories``) or is ``other:<description>``.",
+      "properties": {
+        "anchor": {
+          "minLength": 1,
+          "title": "Anchor",
+          "type": "string"
+        },
+        "dx_mm": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dx Mm"
+        },
+        "dy_mm": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dy Mm"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        },
+        "to": {
+          "anyOf": [
+            {
+              "enum": [
+                "centre",
+                "top-edge",
+                "bottom-edge",
+                "left-edge",
+                "right-edge",
+                "top-left",
+                "top-right",
+                "bottom-left",
+                "bottom-right"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "To"
+        }
+      },
+      "required": [
+        "anchor"
+      ],
+      "title": "Position",
+      "type": "object"
+    },
+    "Reference": {
+      "additionalProperties": false,
+      "description": "An image the factory may match: a shape reference, a mockup, a sample photo.",
+      "properties": {
+        "authority": {
+          "anyOf": [
+            {
+              "enum": [
+                "exact",
+                "approximate"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Authority"
+        },
+        "caption": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Caption"
+        },
+        "id": {
+          "maxLength": 64,
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "shape",
+            "mockup",
+            "sample-photo",
+            "flat",
+            "detail",
+            "other"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "ref": {
+          "minLength": 1,
+          "title": "Ref",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "ref"
+      ],
+      "title": "Reference",
+      "type": "object"
+    },
+    "SampleRound": {
+      "additionalProperties": false,
+      "description": "A sample the factory made from ``made_from_spec_version``, and the changes it needed.\n\nThe changes are applied in ``applied_in_spec_version`` (None while they are still open), so\na render can say what changed since the version the factory last saw.",
+      "properties": {
+        "applied_in_spec_version": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Applied In Spec Version"
+        },
+        "changes": {
+          "items": {
+            "$ref": "#/$defs/Change"
+          },
+          "title": "Changes",
+          "type": "array"
+        },
+        "made_from_spec_version": {
+          "exclusiveMinimum": 0,
+          "title": "Made From Spec Version",
+          "type": "integer"
+        },
+        "n": {
+          "exclusiveMinimum": 0,
+          "title": "N",
+          "type": "integer"
+        },
+        "received": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Received"
+        }
+      },
+      "required": [
+        "n",
+        "made_from_spec_version"
+      ],
+      "title": "SampleRound",
+      "type": "object"
+    },
+    "Seam": {
+      "additionalProperties": false,
+      "description": "How one seam or stitch line is made.",
+      "properties": {
+        "finish": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Finish"
+        },
+        "location": {
+          "minLength": 1,
+          "title": "Location",
+          "type": "string"
+        },
+        "rows": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rows"
+        },
+        "spi": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Spi"
+        },
+        "stitch_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stitch Type"
+        },
+        "thread": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Thread"
+        }
+      },
+      "required": [
+        "location"
+      ],
+      "title": "Seam",
+      "type": "object"
+    },
+    "Trim": {
+      "additionalProperties": false,
+      "properties": {
+        "colour": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Colour"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "description": {
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "id": {
+          "maxLength": 64,
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "minLength": 1,
+          "title": "Kind",
+          "type": "string"
+        },
+        "material_id": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Material Id"
+        },
+        "width": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Length"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "description"
+      ],
+      "title": "Trim",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "approvals": {
+      "items": {
+        "$ref": "#/$defs/Approval"
+      },
+      "title": "Approvals",
+      "type": "array"
+    },
+    "category": {
+      "enum": [
+        "headwear",
+        "top",
+        "bottom",
+        "outerwear",
+        "accessory",
+        "other"
+      ],
+      "title": "Category",
+      "type": "string"
+    },
+    "client": {
+      "maxLength": 64,
+      "pattern": "^[a-z0-9][a-z0-9-]*$",
+      "title": "Client",
+      "type": "string"
+    },
+    "colourway": {
+      "minLength": 1,
+      "title": "Colourway",
+      "type": "string"
+    },
+    "construction": {
+      "$ref": "#/$defs/Construction"
+    },
+    "format_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Format Version",
+      "type": "integer"
+    },
+    "hardware": {
+      "items": {
+        "$ref": "#/$defs/Hardware"
+      },
+      "title": "Hardware",
+      "type": "array"
+    },
+    "id": {
+      "maxLength": 128,
+      "pattern": "^(pre:[a-z0-9-]+:[a-z0-9-]+|[a-z0-9][a-z0-9-]*)$",
+      "title": "Id",
+      "type": "string"
+    },
+    "labels": {
+      "items": {
+        "$ref": "#/$defs/Label"
+      },
+      "title": "Labels",
+      "type": "array"
+    },
+    "materials": {
+      "items": {
+        "$ref": "#/$defs/Material"
+      },
+      "title": "Materials",
+      "type": "array"
+    },
+    "name": {
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "notes": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Notes",
+      "type": "array"
+    },
+    "packaging": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Packaging"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "placements": {
+      "items": {
+        "$ref": "#/$defs/Placement"
+      },
+      "title": "Placements",
+      "type": "array"
+    },
+    "poms": {
+      "items": {
+        "$ref": "#/$defs/Pom"
+      },
+      "title": "Poms",
+      "type": "array"
+    },
+    "quantities": {
+      "additionalProperties": {
+        "minimum": 0,
+        "type": "integer"
+      },
+      "title": "Quantities",
+      "type": "object"
+    },
+    "references": {
+      "items": {
+        "$ref": "#/$defs/Reference"
+      },
+      "title": "References",
+      "type": "array"
+    },
+    "sample_rounds": {
+      "items": {
+        "$ref": "#/$defs/SampleRound"
+      },
+      "title": "Sample Rounds",
+      "type": "array"
+    },
+    "season": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Season"
+    },
+    "sizes": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Sizes",
+      "type": "array"
+    },
+    "spec_version": {
+      "exclusiveMinimum": 0,
+      "title": "Spec Version",
+      "type": "integer"
+    },
+    "trims": {
+      "items": {
+        "$ref": "#/$defs/Trim"
+      },
+      "title": "Trims",
+      "type": "array"
+    }
+  },
+  "required": [
+    "id",
+    "client",
+    "category",
+    "name",
+    "colourway",
+    "spec_version",
+    "sizes"
+  ],
+  "title": "Product",
+  "type": "object"
+}
