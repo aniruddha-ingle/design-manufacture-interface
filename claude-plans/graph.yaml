@@ -73,8 +73,8 @@
   touches: ["src/dmi/render/techpack/**", "src/dmi/render/bom/**", "tests/test_render_techpack*"]
   agents: [techpack-dev]
   checkpoint: false
-  state: todo
-  branch: null
+  state: building
+  branch: render-techpack
   gate: full
 
 - id: poc-hat-package
