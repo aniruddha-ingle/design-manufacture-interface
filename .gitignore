@@ -1,0 +1,42 @@
+# Client design and production files never enter git (Haki is client 0; its tech packs,
+# artwork, patterns and supplier data are confidential). Read where they live, outside the repo.
+*.psd
+*.psb
+*.ai
+*.eps
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.tif
+*.tiff
+*.heic
+*.svg
+*.dxf
+*.dwg
+*.xlsx
+*.xls
+*.csv
+*.numbers
+*.docx
+*.pages
+*.zip
+data/
+clients/
+exports/
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+# Python, tools, OS
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.DS_Store
+.worktrees/
+.claude/worktrees/
