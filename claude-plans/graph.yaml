@@ -73,7 +73,7 @@
   touches: ["src/dmi/render/techpack/**", "src/dmi/render/bom/**", "tests/test_render_techpack*"]
   agents: [techpack-dev]
   checkpoint: false
-  state: building
+  state: review
   branch: render-techpack
   gate: full
 
