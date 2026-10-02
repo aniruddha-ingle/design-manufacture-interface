@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import io
 import json
-import zipfile
 from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
@@ -20,9 +19,9 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill
 
 from dmi.checks import Finding
+from dmi.render import fmt
 from dmi.spec.categories import POMS_BY_CATEGORY
 from dmi.spec.models import Length, Position, Product
-from dmi.spec.units import inch_fraction, mm_to_cm
 
 Resolver = Callable[[str], Path | None]
 TEMPLATE = Path(__file__).with_name("template.typ")
@@ -36,34 +35,20 @@ def cell(value, optional: bool = False) -> dict:
     return {"text": str(value), "gap": False}
 
 
-def length(v: Length | None) -> dict:
-    if v is None or not v.known:
-        return GAP
-    if v.mm is not None:
-        s = f'{mm_to_cm(v.mm)} cm / {inch_fraction(v.mm)}"'
-    else:
-        cm = f"{mm_to_cm(v.min_mm)}–{mm_to_cm(v.max_mm)} cm"
-        s = f'{cm} / {inch_fraction(v.min_mm)}–{inch_fraction(v.max_mm)}"'
-    return cell(s)
+def length(v: Length | None, with_tol: bool = False) -> dict:
+    return cell(fmt.length(v, with_tol))
 
 
 def tolerance(v: Length | None, optional: bool = False) -> dict:
-    if v is None or v.tol_mm is None:
-        return cell(None, optional)
-    minus = v.tol_minus_mm if v.tol_minus_mm is not None else v.tol_mm
-    if minus == v.tol_mm:
-        return cell(f"±{mm_to_cm(v.tol_mm, 2)} cm")
-    return cell(f"+{mm_to_cm(v.tol_mm, 2)} / −{mm_to_cm(minus, 2)} cm")
+    return cell(fmt.tol(v), optional)
 
 
 def position(pos: Position | None) -> dict:
-    if pos is None or pos.dx_mm is None or pos.dy_mm is None or pos.to is None:
-        return GAP if pos is None else cell(f"from {pos.anchor} (incomplete: {pos.note or ''})")
-    s = (
-        f"{pos.to.replace('-', ' ')} at {mm_to_cm(pos.dx_mm)} cm across, "
-        f"{mm_to_cm(pos.dy_mm)} cm up from {pos.anchor.replace('-', ' ')}"
-    )
-    return cell(s + (f" ({pos.note})" if pos.note else ""))
+    """A complete position in words; anything missing is a highlighted gap."""
+    text = fmt.position(pos)
+    if text is None and pos is not None:
+        return {"text": f"incomplete: from {pos.anchor} {pos.note or ''}".strip(), "gap": True}
+    return cell(text)
 
 
 def colour(c) -> dict:
@@ -109,16 +94,16 @@ def view(
     }
     s: list[dict] = []
 
-    applied = [r for r in p.sample_rounds if r.applied_in_spec_version == p.spec_version]
+    applied = list(p.sample_rounds)
     if applied:
         rows = []
         for r in applied:
             for c in r.changes:
                 cur = length(c.current_value) if c.current_value else cell(c.current)
-                tgt = length(c.target_value) if c.target_value else cell(c.target)
+                tgt = length(c.target_value, True) if c.target_value else cell(c.target)
                 rows.append(
                     [
-                        cell(f"S{r.n} #{c.n}"),
+                        cell(f"S{r.n} #{c.n} → v{r.applied_in_spec_version or 'open'}"),
                         cell(c.summary),
                         cell(c.field),
                         cur,
@@ -128,7 +113,7 @@ def view(
                 )
         s.append(
             {
-                "title": f"Changes in v{p.spec_version}",
+                "title": "Changes from samples",
                 "blocks": [
                     para("Applied from these sample rounds; the factory should check them first."),
                     table(
@@ -228,7 +213,7 @@ def view(
             cell(", ".join(f"{f.percent:g}% {f.fibre}" for f in m.composition)),
             cell(f"{m.weight_gsm:g} gsm" if m.weight_gsm else None)
             if m.role == "shell"
-            else length(m.thickness)
+            else length(m.thickness, True)
             if m.thickness
             else cell("—"),
             colour(m.colour),
@@ -241,7 +226,7 @@ def view(
             cell(t.id),
             cell(t.kind),
             cell(t.description),
-            length(t.width),
+            length(t.width, True),
             colour(t.colour) if not t.material_id else cell(f"as {t.material_id}"),
         ]
         for t in p.trims
@@ -254,7 +239,7 @@ def view(
             cell(h.quantity),
             cell(h.material),
             cell(h.finish),
-            length(h.size),
+            length(h.size, True),
             cell(h.supplier_ref, optional=True),
             cell("; ".join(h.requirements) or "—"),
         ]
@@ -267,8 +252,8 @@ def view(
             cell(lb.material),
             cell(lb.attachment),
             position(lb.position),
-            length(lb.width),
-            length(lb.height),
+            length(lb.width, True),
+            length(lb.height, True),
             cell(lb.content or lb.artwork_ref),
         ]
         for lb in p.labels
@@ -377,6 +362,25 @@ def view(
         }
     )
 
+    if p.approvals:
+        rows = [
+            [
+                cell(f"v{a.spec_version}"),
+                cell(a.decision),
+                cell(a.who),
+                cell(a.at.date()),
+                cell(a.note, True),
+                cell(a.source),
+            ]
+            for a in p.approvals
+        ]
+        s.append(
+            {
+                "title": "Approvals",
+                "blocks": [table(["Spec", "Decision", "Who", "When", "Note", "Source"], rows)],
+            }
+        )
+
     if p.notes:
         s.append({"title": "Notes", "blocks": [para(n) for n in p.notes]})
 
@@ -454,15 +458,4 @@ def render_bom(p: Product, findings: list[Finding]) -> bytes:
                 r += 1
     buf = io.BytesIO()
     wb.save(buf)
-    return _fixed_zip(buf.getvalue())
-
-
-def _fixed_zip(data: bytes) -> bytes:
-    src = zipfile.ZipFile(io.BytesIO(data))
-    out = io.BytesIO()
-    with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as dst:
-        for name in src.namelist():
-            info = zipfile.ZipInfo(name, date_time=(2000, 1, 1, 0, 0, 0))
-            info.compress_type = zipfile.ZIP_DEFLATED
-            dst.writestr(info, src.read(name))
-    return out.getvalue()
+    return fmt.fixed_zip(buf.getvalue())

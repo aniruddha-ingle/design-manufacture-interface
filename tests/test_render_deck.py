@@ -17,11 +17,18 @@ def texts(data: bytes) -> list[list[str]]:
     return [[sh.text_frame.text for sh in s.shapes if sh.has_text_frame] for s in prs.slides]
 
 
-def test_fmt():
-    assert fmt(Length(mm=75, tol_mm=2)) == '7.5 cm (3") ±0.2'
-    assert fmt(Length(min_mm=540, max_mm=600, tol_mm=5)) == "54.0–60.0 cm ±0.5"
-    assert fmt(Length(mm=230, tol_mm=3, tol_minus_mm=1)).endswith("+0.3/−0.1")
+def test_fmt_uses_the_shared_format():
+    assert fmt(Length(mm=75, tol_mm=2)) == '7.5 cm / 3" ±2 mm'
+    assert fmt(Length(min_mm=540, max_mm=600, tol_mm=5)).endswith("(adjustable) ±5 mm")
     assert fmt(Length()) is None and fmt(None) is None
+
+
+def test_back_slide_carries_labels_and_hardware():
+    slides = texts(render_brief(load(GOLDEN)))
+    back = "\n".join(next(s for s in slides if s[0] == "Back of Hat (Label)"))
+    assert "6 × eyelet" in back and "brushed nickel" in back
+    assert "care label: printed satin" in back and "reads: 100% cotton" in back
+    assert "to the viewer's left" in back
 
 
 def test_brief_follows_haki_structure_and_carries_numbers():
@@ -36,7 +43,7 @@ def test_brief_follows_haki_structure_and_carries_numbers():
         "Width: 6.0 cm" in body and "Position: bottom edge" in body and "madeira SYN-1001" in body
     )
     assert "Not specified yet" not in body  # the golden cap is complete
-    assert any("Brim length: 7.5 cm" in "\n".join(s) for s in slides)
+    assert any("Brim length (OS): 7.5 cm" in "\n".join(s) for s in slides)
 
 
 def test_gaps_are_shown_on_the_slide():

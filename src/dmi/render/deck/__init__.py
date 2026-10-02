@@ -12,7 +12,6 @@ Images are refs (never files in git): each shows as a labelled frame, or as the 
 from __future__ import annotations
 
 import io
-import zipfile
 from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
@@ -21,8 +20,8 @@ from pptx import Presentation
 from pptx.dml.color import RGBColor
 from pptx.util import Cm, Pt
 
+from dmi.render import fmt as F
 from dmi.spec.models import Length, Placement, Product, SampleRound
-from dmi.spec.units import inch_fraction, mm_to_cm
 
 Resolver = Callable[[str], Path | None]
 FIXED = datetime(2000, 1, 1)
@@ -33,21 +32,8 @@ W, H = Cm(25.4), Cm(14.29)  # Haki's decks are 16:9 at this size
 
 
 def fmt(v: Length | None) -> str | None:
-    """'8.0 cm (3 1/8") ±0.2' style, or None for a gap."""
-    if v is None or not v.known:
-        return None
-    if v.mm is not None:
-        s = f'{mm_to_cm(v.mm)} cm ({inch_fraction(v.mm)}")'
-    else:
-        s = f"{mm_to_cm(v.min_mm)}–{mm_to_cm(v.max_mm)} cm"
-    if v.tol_mm is not None:
-        minus = v.tol_minus_mm if v.tol_minus_mm is not None else v.tol_mm
-        s += (
-            f" ±{mm_to_cm(v.tol_mm, 2)}"
-            if minus == v.tol_mm
-            else f" +{mm_to_cm(v.tol_mm, 2)}/−{mm_to_cm(minus, 2)}"
-        )
-    return s
+    """A length with its tolerance (dmi.render.fmt), or None for a gap."""
+    return F.length(v, with_tol=True)
 
 
 class _Deck:
@@ -95,9 +81,15 @@ class _Deck:
         for k, ref in enumerate(refs):
             self.image(s, ref, x0 + k * (w + 0.3), y, w, min(height, w * 1.3))
 
-    def gaps(self, s, missing: list[str], y=11.6) -> None:
-        if missing:
-            self.text(s, 14.2, y, 10.4, 2.2, ["Not specified yet:", *missing], size=10, gap=True)
+    def gaps(self, s, missing: list[str], y=10.4) -> None:
+        """The "Not specified yet" box: sized to its lines, the overflow counted, never cut."""
+        if not missing:
+            return
+        shown = missing[:6] + (
+            [f"+{len(missing) - 6} more (see the tech pack)"] if len(missing) > 6 else []
+        )
+        h = min(0.5 + 0.45 * (len(shown) + 1), H.cm - y - 0.2)
+        self.text(s, 14.2, y, 10.4, h, ["Not specified yet:", *shown], size=10, gap=True)
 
     def save(self) -> bytes:
         cp = self.prs.core_properties
@@ -106,19 +98,7 @@ class _Deck:
         cp.revision = 1
         buf = io.BytesIO()
         self.prs.save(buf)
-        return _fixed_zip(buf.getvalue())
-
-
-def _fixed_zip(data: bytes) -> bytes:
-    """Rewrite the package with fixed entry times and order, so bytes depend only on content."""
-    src = zipfile.ZipFile(io.BytesIO(data))
-    out = io.BytesIO()
-    with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as dst:
-        for name in src.namelist():  # [Content_Types].xml stays first
-            info = zipfile.ZipInfo(name, date_time=(2000, 1, 1, 0, 0, 0))
-            info.compress_type = zipfile.ZIP_DEFLATED
-            dst.writestr(info, src.read(name))
-    return out.getvalue()
+        return F.fixed_zip(buf.getvalue())
 
 
 def _placement_title(pl: Placement) -> str:
@@ -133,14 +113,8 @@ def _placement_lines(pl: Placement) -> tuple[list[str], list[str]]:
     for label, v in (("Width", pl.width), ("Height", pl.height)):
         s = fmt(v)
         (lines.append(f"{label}: {s}") if s else missing.append(label.lower()))
-    if pl.position and pl.position.dx_mm is not None and pl.position.dy_mm is not None:
-        to = (pl.position.to or "item").replace("-", " ")
-        lines.append(
-            f"Position: {to} at {mm_to_cm(pl.position.dx_mm)} cm across, "
-            f"{mm_to_cm(pl.position.dy_mm)} cm up from {pl.position.anchor.replace('-', ' ')}"
-        )
-    else:
-        missing.append("measured position")
+    pos = F.position(pl.position)
+    (lines.append(f"Position: {pos}") if pos else missing.append("measured position"))
     for e in pl.elements:
         ref = f"{e.colour.system or ''} {e.colour.code or ''}".strip() if e.colour else ""
         thread = f", {e.thread}" if e.thread else ""
@@ -192,21 +166,45 @@ def render_brief(p: Product, resolve: Resolver | None = None) -> bytes:
         d.images(s, [r.ref for r in p.references if r.kind == "detail"])
         lines, missing = [], []
         for h in p.hardware:
-            size = fmt(h.size)
-            lines.append(f"• {h.kind}: {h.description}" + (f", {size}" if size else ""))
+            parts = [x for x in (h.material, h.finish, fmt(h.size)) if x]
+            qty = f"{h.quantity} × " if h.quantity else ""
+            lines.append(
+                f"• {qty}{h.kind}: {h.description}" + (f" ({', '.join(parts)})" if parts else "")
+            )
             lines += [f"   must: {r}" for r in h.requirements]
             if h.material is None or h.finish is None:
-                missing.append(f"{h.kind} material/finish")
+                missing.append(f"{h.kind}: material and finish")
+            if h.size is None or not h.size.known:
+                missing.append(f"{h.kind}: size")
         for lb in p.labels:
-            lines.append(f"• {lb.kind} label" + (f": {lb.material}" if lb.material else ""))
-            if lb.position is None:
-                missing.append(f"{lb.kind} label position")
-        d.text(s, 14.2, 3.0, 10.4, 8.4, lines, 12)
+            w, ht = fmt(lb.width), fmt(lb.height)
+            parts = [
+                x for x in (lb.material, lb.attachment, f"{w} × {ht}" if w and ht else None) if x
+            ]
+            lines.append(f"• {lb.kind} label" + (f": {', '.join(parts)}" if parts else ""))
+            pos = F.position(lb.position)
+            if pos:
+                lines.append(f"   at {pos}")
+            if lb.content:
+                lines.append(f"   reads: {lb.content}")
+            for what, ok in (("position", pos), ("size", w and ht), ("material", lb.material)):
+                if not ok:
+                    missing.append(f"{lb.kind} label: {what}")
+        d.text(s, 14.2, 3.0, 10.4, 7.2, lines, 11)
         d.gaps(s, missing)
 
     s = d.slide("Measurements")
-    rows = [f"{pm.name}: {fmt(pm.values.get(size)) or '—'}" for pm in p.poms for size in p.sizes]
-    d.text(s, 0.9, 3.0, 23.6, 10.5, rows or ["No measurements yet"], 13, gap=not rows)
+    rows, missing = [], []
+    for pm in p.poms:
+        for size in p.sizes:
+            v = fmt(pm.values.get(size))
+            (
+                rows.append(f"{pm.name} ({size}): {v}")
+                if v
+                else missing.append(f"{pm.name} ({size})")
+            )
+    d.text(s, 0.9, 3.0, 13.0, 10.5, rows or ["No measurements yet"], 13, gap=not rows)
+    d.gaps(s, missing, y=3.0)
 
     s = d.slide("Construction Details")
     c = p.construction
@@ -244,12 +242,12 @@ def render_revisions(p: Product, round_: SampleRound, resolve: Resolver | None =
         s = d.slide(f"#{c.n}: {c.summary}")
         d.images(s, c.image_refs[:3])
         lines = []
-        cur, tgt = fmt(c.current_value), fmt(c.target_value)
-        if cur or tgt:
-            lines.append(f"Current sample: {cur or c.current or '—'}")
-            lines.append(f"Adjust to: {tgt or c.target or '—'}")
-        elif c.target:
-            lines.append(c.target)
+        cur = fmt(c.current_value) or c.current
+        tgt = fmt(c.target_value) or c.target
+        if cur:
+            lines.append(f"Current sample: {cur}")
+        if tgt:
+            lines.append(f"Adjust to: {tgt}" if cur else tgt)
         if c.reason:
             lines.append(f"Why: {c.reason}")
         d.text(s, 14.2, 3.0, 10.4, 8.4, lines or ["(no instruction text)"], 13)

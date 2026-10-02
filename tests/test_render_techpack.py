@@ -27,7 +27,7 @@ def flat(v: dict) -> list[dict]:
 def test_cells():
     assert length(Length(mm=75)) == {"text": '7.5 cm / 3"', "gap": False}
     assert length(Length())["gap"] and tolerance(Length(mm=1))["gap"]
-    assert tolerance(Length(mm=1, tol_mm=2, tol_minus_mm=1))["text"] == "+0.2 / −0.1 cm"
+    assert tolerance(Length(mm=1, tol_mm=2, tol_minus_mm=1))["text"] == "+2 mm / −1 mm"
 
 
 def test_golden_view_has_no_gaps_and_every_section():
@@ -35,7 +35,8 @@ def test_golden_view_has_no_gaps_and_every_section():
     v = view(p, check(p))
     titles = [s["title"] for s in v["sections"]]
     for t in (
-        "Changes in v2",
+        "Changes from samples",
+        "Approvals",
         "References",
         "Measurements",
         "Bill of materials",
@@ -82,6 +83,15 @@ def test_pdf_with_images(tmp_path: Path):
     p = load(GOLDEN)
     pdf = render_pdf(p, [], resolve=lambda ref: tmp_path / "a.png", root=tmp_path)
     assert pdf[:5] == b"%PDF-"
+
+
+def test_bom_is_deterministic_across_seconds(monkeypatch):
+    import time
+
+    p = load(GOLDEN)
+    a = render_bom(p, [])
+    time.sleep(1.1)
+    assert render_bom(p, []) == a
 
 
 def test_bom_workbook():
