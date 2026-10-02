@@ -58,7 +58,7 @@
   touches: ["src/dmi/render/deck/**", "tests/test_render_deck*"]
   agents: [techpack-dev]
   checkpoint: false
-  state: building
+  state: review
   branch: render-haki-deck
   gate: full
 
