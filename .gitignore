@@ -21,6 +21,10 @@
 *.numbers
 *.docx
 *.pages
+*.pptx
+*.ppt
+*.potx
+*.odp
 *.zip
 data/
 clients/
