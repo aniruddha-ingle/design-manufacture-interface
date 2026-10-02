@@ -71,7 +71,8 @@ combined."
 - Python 3.11 via uv on this Intel Mac; no source builds. The shared Mac: about 6 busy threads
   per department, heavy runs under the shared `heavy-test` lock, niced.
 - Agents only where they pay off; under ~15 minutes, the lead does it inline in a worktree.
-- **Commit and push only with the user's yes**, until they say it is routine.
+- **Full autonomy** (the user, 2026-10-02): plan, build, commit, merge and push without asking;
+  record each call with its date in the plan. Ask before spend, deletions or Haki data in git.
 
 ## 2. Plan, then dispatch
 - Every node starts as `claude-plans/NN-name.md`: what the manufacturer needs and why, the

@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+# pre-push: the last check before anything leaves this Mac. Installed by
+# scripts/lead/install-hooks.sh (core.hooksPath), so it runs in every worktree.
+#
+# Refuses a push when the commits being pushed contain
+#   - an image, design, document, slide-deck, production or data file (CLAUDE.md: Haki's
+#     decks, artwork, photos, measurements and supplier data never go in git; tests make
+#     synthetic products and decks at run time): *.psd *.psb *.ai *.eps *.pdf *.png *.jpg
+#     *.jpeg *.webp *.gif *.tif* *.heic *.svg, *.pptx *.ppt *.potx *.odp *.key *.docx *.doc
+#     *.pages *.xlsx *.xls *.numbers *.csv, *.dxf *.dwg, *.zip, video, audio and edit projects, *.parquet
+#     *.sqlite* *.db *.dump, and model weights (*.pth *.pt *.ckpt *.safetensors *.onnx),
+#   - a .env* file (only .env.example is allowed), a .pem or .key file,
+#   - a blob over 1 MB,
+#   - an added line that looks like a secret (stdlib regexes below: private keys, Meta
+#     `EAA...` tokens, GitHub, AWS, Anthropic/OpenAI, Slack, JWTs), unless the line carries
+#     `allowlist secret`.
+# Any branch may be pushed, main included (the lead pushes main). Bash 3.2 and python3
+# only. DMI_SKIP_PREPUSH=1 skips it (deliberate; say so).
+set -euo pipefail
+remote="$1"
+[ "${DMI_SKIP_PREPUSH:-}" = 1 ] && { echo "pre-push: skipped (DMI_SKIP_PREPUSH=1)" >&2; exit 0; }
+
+zero=0000000000000000000000000000000000000000
+fail=0
+refuse() { echo "pre-push: REFUSED: $*" >&2; fail=1; }
+
+media_re='\.(psd|psb|ai|eps|pdf|png|jpe?g|webp|gif|tif[^/]*|heic|svg|pptx?|potx|odp|docx?|pages|xlsx?|numbers|csv|dxf|dwg|zip|mp4|mov|m4v|mkv|webm|avi|prproj|aep|drp|fcpxml|wav|mp3|aac|m4a|aiff?|flac|parquet|sqlite[^/]*|db|dump|pth|pt|ckpt|safetensors|onnx)$'
+secret_files_re='(^|/)\.env[^/]*$|\.pem$|\.key$'
+limit=1000000
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  [ "$local_sha" = "$zero" ] && continue # a delete
+  # The commits that are new to the remote: not on any of its known refs.
+  if [ "$remote_sha" = "$zero" ]; then
+    range=("$local_sha" --not --remotes="$remote")
+  else
+    range=("$remote_sha..$local_sha")
+  fi
+  commits="$(git rev-list "${range[@]}")"
+  [ -n "$commits" ] || continue
+
+  # Paths touched by those commits.
+  paths="$(echo "$commits" | xargs -n 50 git diff-tree --no-commit-id -r --name-only --diff-filter=AMRC | sort -u)"
+  hit="$(echo "$paths" | grep -iE "$media_re" || true)"
+  [ -z "$hit" ] || refuse "image, design, deck, document, data or weights files in the push (Haki's assets and data stay out of git):
+$(echo "$hit" | sed 's/^/    /')"
+  hit="$(echo "$paths" | grep -iE "$secret_files_re" | grep -vE '(^|/)\.env\.example$' || true)"
+  [ -z "$hit" ] || refuse ".env/.pem/.key files in the push (only .env.example, names without values):
+$(echo "$hit" | sed 's/^/    /')"
+
+  # Blob sizes: every object the push introduces.
+  big="$(git rev-list --objects "${range[@]}" |
+    git cat-file --batch-check='%(objecttype) %(objectsize) %(rest)' |
+    awk -v lim="$limit" '$1=="blob" && $2>lim {printf "    %s (%.1f MB)\n", $3, $2/1000000}')"
+  [ -z "$big" ] || refuse "files over 1 MB in the push:
+$big"
+
+  # Secrets in added lines, commit by commit (so one committed then removed is caught).
+  # A match is allowed when the same text sits on a line marked `allowlist secret` in the
+  # pushed tip (so a fixture marked later still passes; a secret committed then removed
+  # never has such a line at the tip and stays refused).
+  secrets="$(echo "$commits" | xargs -n 50 git show -U0 --no-color --format= --diff-filter=AM | TIP="$local_sha" python3 -c '
+import os, re, subprocess, sys
+tip = os.environ.get("TIP", "")
+_tipcache = {}
+def allowed_at_tip(path, s):
+    if path not in _tipcache:
+        r = subprocess.run(["git", "show", f"{tip}:{path}"], capture_output=True)
+        text = r.stdout.decode("utf-8", "replace") if r.returncode == 0 else ""
+        _tipcache[path] = [l for l in text.splitlines() if "allowlist secret" in l or "allowlist-secret" in l]
+    return any(s in l for l in _tipcache[path])
+pats = [
+    ("AWS access key", r"\bAKIA[0-9A-Z]{16}\b"),
+    ("GitHub token", r"\b(?:gh[pousr]_[A-Za-z0-9]{36,}|github_pat_[A-Za-z0-9_]{20,})"),
+    ("private key", r"-----BEGIN (?:RSA |EC |DSA |OPENSSH |PGP |ENCRYPTED )?PRIVATE KEY(?: BLOCK)?-----"),
+    ("Meta access token", r"\bEAA[A-Za-z0-9]{20,}"),
+    ("Slack token", r"\bxox[baprs]-[0-9A-Za-z-]{10,}"),
+    ("Anthropic/OpenAI key", r"\b(?:sk-ant-[A-Za-z0-9_-]{20,}|sk-[A-Za-z0-9]{32,})\b"),
+    ("Tailscale key", r"\btskey-[a-z]+-[A-Za-z0-9-]{20,}"),
+    ("JWT", r"\beyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}"),
+]
+# Weak patterns: real-looking shapes with fake values are normal in tests, so test files
+# (tests/, test_*.py, *.spec.ts, *.test.ts) are exempt from these two only.
+weak = [
+    ("URL with a password", r"\b[a-z][a-z0-9+.-]*://[^/\s:@]+:[^/\s@]{8,}@"),
+    ("assigned secret", r"(?i)\b(?:secret|api[_-]?key|access[_-]?token|auth[_-]?token|password)\b\s*[:=]\s*[\"\x27][A-Za-z0-9+/_=.-]{20,}[\"\x27]"),
+]
+pats = [(n, re.compile(p), False) for n, p in pats] + [(n, re.compile(p), True) for n, p in weak]
+testfile = re.compile(r"(^|/)tests?/|(^|/)test_[^/]*\.py$|\.(spec|test)\.[cm]?[jt]sx?$")
+path = "?"
+hits = []
+for line in sys.stdin.buffer.read().decode("utf-8", "replace").splitlines():
+    if line.startswith("+++ b/"):
+        path = line[6:]
+    elif line.startswith("+") and not line.startswith("+++"):
+        if "allowlist secret" in line or "allowlist-secret" in line:
+            continue
+        for name, pat, is_weak in pats:
+            if is_weak and testfile.search(path):
+                continue
+            m = pat.search(line)
+            if m:
+                s = m.group(0)
+                if allowed_at_tip(path, s):
+                    break
+                shown = s[:6] + "…" + s[-4:] if len(s) > 14 else s
+                hits.append(f"    {path}: {name} ({shown})")
+                break
+print("\n".join(sorted(set(hits))))
+')"
+  [ -z "$secrets" ] || refuse "possible secrets in added lines (mark a known-fake one with 'allowlist secret'):
+$secrets"
+done
+
+if [ "$fail" = 1 ]; then
+  echo "pre-push: nothing was pushed. Fix the commits (rewrite them so the file or secret was never committed)." >&2
+  exit 1
+fi
+exit 0

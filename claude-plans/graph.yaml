@@ -1,0 +1,93 @@
+# The board for design-manufacture-interface. Plan 01 (2026-10-02): the Haki hat POC, one
+# spec rendered as Haki's deck and a complete tech pack whose north-star test is the hat's
+# past sample revisions. Strict YAML subset (scripts/lead/README.md). Lower priority first.
+
+- id: spec-contract
+  plan: 1
+  spec: []
+  title: "Spec contract v1: identity, materials, placements, POMs with unit and tolerance, construction, hardware, trims and labels, sample rounds; headwear POMs; a synthetic golden hat"
+  visible: false
+  priority: 0
+  user_override: null
+  depends_on: []
+  touches: ["docs/contracts/**", "src/dmi/spec/**", "tests/test_spec*", "pyproject.toml", "uv.lock"]
+  agents: [spec-dev]
+  checkpoint: false
+  state: todo
+  branch: null
+  gate: full
+
+- id: checks-headwear
+  plan: 1
+  spec: []
+  title: "Completeness checks as data: the standard headwear set plus revision-derived checks; severity per profile; the gap report"
+  visible: false
+  priority: 1
+  user_override: null
+  depends_on: [spec-contract]
+  touches: ["src/dmi/checks/**", "tests/test_checks*"]
+  agents: [spec-dev]
+  checkpoint: false
+  state: todo
+  branch: null
+  gate: full
+
+- id: haki-importer
+  plan: 1
+  spec: []
+  title: "profiles/haki and the deck importer: brief deck to spec, revision deck to a sample round (synthetic decks in tests)"
+  visible: false
+  priority: 1
+  user_override: null
+  depends_on: [spec-contract]
+  touches: ["profiles/haki/**", "src/dmi/importers/**", "tests/test_import*"]
+  agents: [client-dev]
+  checkpoint: false
+  state: todo
+  branch: null
+  gate: full
+
+- id: render-haki-deck
+  plan: 1
+  spec: []
+  title: "Render Haki's deck format (brief and revision round) from the spec, deterministic"
+  visible: true
+  priority: 1
+  user_override: null
+  depends_on: [spec-contract]
+  touches: ["src/dmi/render/deck/**", "tests/test_render_deck*"]
+  agents: [techpack-dev]
+  checkpoint: false
+  state: todo
+  branch: null
+  gate: full
+
+- id: render-techpack
+  plan: 1
+  spec: []
+  title: "Render the complete tech pack PDF (Typst), BOM xlsx and gap report page from the spec"
+  visible: true
+  priority: 1
+  user_override: null
+  depends_on: [spec-contract, checks-headwear]
+  touches: ["src/dmi/render/techpack/**", "src/dmi/render/bom/**", "tests/test_render_techpack*"]
+  agents: [techpack-dev]
+  checkpoint: false
+  state: todo
+  branch: null
+  gate: full
+
+- id: poc-hat-package
+  plan: 1
+  spec: []
+  title: "The real hat end to end: import, spec, both renders, factory-reviewer with the north-star test, a Haki swipe item"
+  visible: true
+  priority: 2
+  user_override: null
+  depends_on: [haki-importer, render-haki-deck, render-techpack]
+  touches: ["claude-plans/01-*"]
+  agents: [factory-reviewer]
+  checkpoint: true
+  state: todo
+  branch: null
+  gate: full
