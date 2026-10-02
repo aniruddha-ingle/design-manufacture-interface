@@ -43,8 +43,8 @@
   touches: ["profiles/haki/**", "src/dmi/importers/**", "tests/test_import*"]
   agents: [client-dev]
   checkpoint: false
-  state: todo
-  branch: null
+  state: building
+  branch: haki-importer
   gate: full
 
 - id: render-haki-deck
