@@ -195,7 +195,16 @@ def view(
             [cell("Height"), length(pl.height)],
             [cell("Height tolerance"), tolerance(pl.height)],
             [cell("Position"), position(pl.position)],
-            [cell("Stitch count"), cell(pl.stitch_count, optional=True)]
+            [
+                cell("Stitch count"),
+                cell(
+                    pl.stitch_count,
+                    optional=not any(
+                        f.code == "stitch-count-missing" and f.field == f"placements.{pl.id}"
+                        for f in findings
+                    ),
+                ),
+            ]
             if pl.technique and "embroider" in pl.technique or pl.technique == "chain-stitch"
             else None,
             [cell("Density"), cell(pl.density, optional=True)]

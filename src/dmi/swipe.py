@@ -28,10 +28,10 @@ def tech_package_item(
     changes = sum(len(r.changes) for r in p.sample_rounds)
     blocking = sum(f.severity == "block" for f in findings)
     summary = (
-        f"Complete tech pack v{p.spec_version}: every sample change so far ({changes}) stated "
-        f"up front, measurements, artwork, BOM and construction; {len(findings)} open gaps "
-        f"({blocking} blocking) listed for the factory. Keep = send it with the deck; "
-        f"cut = hold; love = make this the standard for every product."
+        "Keep = send this tech pack to the factory with the deck; cut = hold it; love = make it "
+        f"the standard for every product. v{p.spec_version} states every sample change so far "
+        f"({changes}) up front, plus measurements, artwork, BOM and construction; "
+        f"{len(findings)} open gaps ({blocking} blocking) are listed for the factory."
     )
     item = {
         "item_key": item_key(p),
