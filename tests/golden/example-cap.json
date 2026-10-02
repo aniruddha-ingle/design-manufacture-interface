@@ -305,7 +305,8 @@
       },
       "requirements": [
         "no teeth; must not mark the leather strap"
-      ]
+      ],
+      "supplier_ref": "SYN-BKL-20"
     },
     {
       "id": "top-button",
@@ -334,7 +335,8 @@
         "anchor": "top-button",
         "to": "centre",
         "dy_mm": -55,
-        "note": "one per panel, 55 mm down each panel seam"
+        "note": "one per panel, 55 mm down each panel seam",
+        "dx_mm": 0
       },
       "material": "thread",
       "finish": "sewn, tonal",
@@ -377,7 +379,15 @@
       },
       "material": "printed satin",
       "attachment": "sewn into seam",
-      "content": "100% cotton. Spot clean only. Made in SYN."
+      "content": "100% cotton. Spot clean only. Made in SYN.",
+      "width": {
+        "mm": 30,
+        "tol_mm": 1
+      },
+      "height": {
+        "mm": 60,
+        "tol_mm": 1
+      }
     }
   ],
   "trims": [

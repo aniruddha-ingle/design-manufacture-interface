@@ -10,17 +10,18 @@ import sys
 
 from dmi.spec import load
 
-from . import check, history, report_json
+from . import check, history, profile_severity, report_json
 
 
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(prog="python -m dmi.checks")
     ap.add_argument("spec")
-    ap.add_argument("--severity", choices=["block", "warn"], default="block")
+    ap.add_argument("--severity", choices=["block", "warn"], help="default: the client profile's")
     ap.add_argument("--history", nargs="*", default=[], help="past specs of the same category")
     a = ap.parse_args(argv)
     product = load(a.spec)
-    findings = check(product, history(load(h) for h in a.history), a.severity)
+    severity = a.severity or profile_severity(product.client)
+    findings = check(product, history(load(h) for h in a.history), severity)
     sys.stdout.write(report_json(product, findings))
     return 1 if any(f.severity == "block" for f in findings) else 0
 

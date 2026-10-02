@@ -88,6 +88,11 @@ def test_revision_history_marks_and_tightens_checks():
     strict = {(f.code, f.field): f.source for f in check(nxt, learned)}
     assert strict[("length-missing", "poms.brim-length")] == "revision-history"
     assert strict[("hardware-requirements-missing", "hardware.buckle")] == "revision-history"
+    # stricter, not just re-tagged: a revised hardware kind must also name its supplier
+    d["hardware"][0].pop("supplier_ref")
+    strict = codes(check(Product.model_validate(d), learned))
+    assert ("supplier-missing", "hardware.buckle") in strict
+    assert ("supplier-missing", "hardware.buckle") not in codes(check(Product.model_validate(d)))
 
 
 def test_report_counts():
@@ -97,3 +102,46 @@ def test_report_counts():
     rep = report(p, check(p, severity="warn"))
     assert (rep["blocking"], rep["warnings"]) == (0, 1)
     assert rep["from_revision_history"] == 1  # the golden cap's own round revised the brim
+
+
+def test_revised_pom_needs_tolerance_even_if_optional():
+    d = golden()
+    d["poms"][-1]["values"]["OS"] = {"mm": 55}  # eyelet position: tolerance optional
+    p = Product.model_validate(d)
+    assert ("tolerance-missing", "poms.eyelet-position") not in codes(check(p))
+    learned = {Learned("pom", "eyelet-position")}
+    assert ("tolerance-missing", "poms.eyelet-position") in codes(check(p, learned))
+
+
+def test_revised_non_standard_pom_is_checked():
+    found = check(load(GOLDEN), {Learned("pom", "visor-curve")})
+    assert ("length-missing", "poms.visor-curve") in codes(found)
+
+
+def test_trims_labels_hardware_packaging_are_checked():
+    d = golden()
+    d["trims"][0].pop("width")
+    d["labels"][1].pop("content")
+    d["labels"][0].pop("artwork_ref")
+    d["hardware"][2].pop("quantity")
+    d["hardware"][2].pop("position")
+    d["packaging"] = {}
+    found = codes(check(Product.model_validate(d)))
+    for expected in [
+        ("length-missing", "trims.sweatband-tape.width"),
+        ("care-content-missing", "labels.care"),
+        ("artwork-missing", "labels.inner-brand"),
+        ("quantity-missing", "hardware.eyelets"),
+        ("position-missing", "hardware.eyelets"),
+        ("packaging-missing", "packaging"),
+    ]:
+        assert expected in found, expected
+
+
+def test_profile_severity(tmp_path):
+    from dmi.checks import profile_severity
+
+    (tmp_path / "acme").mkdir()
+    (tmp_path / "acme/profile.json").write_text('{"gap_severity": "warn"}')
+    assert profile_severity("acme", tmp_path) == "warn"
+    assert profile_severity("nobody", tmp_path) == "block"
