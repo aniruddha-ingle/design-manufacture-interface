@@ -28,8 +28,8 @@
   touches: ["src/dmi/checks/**", "tests/test_checks*"]
   agents: [spec-dev]
   checkpoint: false
-  state: todo
-  branch: null
+  state: building
+  branch: checks-headwear
   gate: full
 
 - id: haki-importer
