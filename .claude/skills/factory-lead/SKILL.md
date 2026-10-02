@@ -131,3 +131,6 @@ combined."
   the user's real data. Test on data shaped like the client's and assert the output changed.
 - 2026-10-02 · A handoff recorded a client product's name and measurements in another repo's
   git. Describe the method in git; the numbers stay in the client's files.
+- 2026-10-02 · A cleanup chained after a failed integrate.sh force-deleted an unmerged
+  branch (recovered from the object store). Never chain cleanup to a merge with `;`; delete
+  branches with `git branch -d` (refuses unmerged), never `-D`, and only after "main is now".
