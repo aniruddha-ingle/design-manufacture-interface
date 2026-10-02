@@ -88,6 +88,6 @@
   touches: ["claude-plans/01-*"]
   agents: [factory-reviewer]
   checkpoint: true
-  state: review
+  state: merged
   branch: poc-hat-package
   gate: full
